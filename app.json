@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "EchoVerse",
+    "slug": "echoverse-mobile",
+    "scheme": "echoverse",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow EchoVerse to attach photos to your memories."
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Allow EchoVerse to record voice memories."
+        }
+      ],
+      "expo-asset"
+    ],
+    "android": {
+      "package": "com.echoverse.memories",
+      "edgeToEdgeEnabled": true
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.echoverse.memories"
+    },
+    "experiments": {
+      "typedRoutes": false
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    }
+  }
+}
