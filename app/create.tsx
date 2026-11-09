@@ -52,10 +52,13 @@ export default function Create() {
   const [recordingPending, setRecordingPending] = useState(false);
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(recorder);
-  useEffect(() => () => {
-    if (recorder.isRecording) void recorder.stop().catch(() => {});
-    void setAudioModeAsync({ allowsRecording: false }).catch(() => {});
-  }, [recorder]);
+  useEffect(
+    () => () => {
+      if (recorder.isRecording) void recorder.stop().catch(() => {});
+      void setAudioModeAsync({ allowsRecording: false }).catch(() => {});
+    },
+    [recorder],
+  );
 
   async function pickPhoto() {
     try {
@@ -99,7 +102,8 @@ export default function Create() {
     }
   }
   async function save() {
-    if (savingRef.current || recordingBusy.current || recorder.isRecording) return;
+    if (savingRef.current || recordingBusy.current || recorder.isRecording)
+      return;
     if (!title.trim() || !story.trim()) {
       notify("Missing details", "Add a title and a story to create your star.");
       return;

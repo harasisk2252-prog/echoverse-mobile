@@ -21,7 +21,8 @@
           "microphonePermission": "Allow EchoVerse to record voice memories."
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      "expo-secure-store"
     ],
     "android": {
       "package": "com.echoverse.memories",

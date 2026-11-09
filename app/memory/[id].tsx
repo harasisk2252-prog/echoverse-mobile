@@ -133,6 +133,31 @@ export default function MemoryDetail() {
           </Text>
         </Glass>
         {m.audio && <VoicePlayer uri={m.audio} />}
+        {m.universe === "private" && (
+          <View style={{ gap: 12, marginTop: 20 }}>
+            <Button
+              label="◌ Add an afterglow"
+              onPress={() =>
+                router.push({
+                  pathname: "/afterglow",
+                  params: { memoryId: m.id },
+                })
+              }
+            />
+            <Button
+              secondary
+              label="Connect in a constellation"
+              onPress={() => router.push("/constellations")}
+            />
+            <Button
+              secondary
+              label="Share a copy with my group"
+              onPress={() =>
+                router.push({ pathname: "/shared", params: { memoryId: m.id } })
+              }
+            />
+          </View>
+        )}
         <View style={{ marginTop: 30 }}>
           <Button
             secondary

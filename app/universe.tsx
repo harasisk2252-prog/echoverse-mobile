@@ -24,19 +24,33 @@ import {
 import { Space, Title, Sub, Glass } from "../src/ui";
 import { C, moods } from "../src/theme";
 import { useMemories, Universe } from "../src/store";
+import { useFeatures } from "../src/features";
+import { Magic } from "../src/feature-ui";
 
 export default function UniverseScreen() {
   const { width: W, height: H } = useWindowDimensions();
   const GW = W * 1.35,
     GH = Math.max(H * 0.59, 420);
-  const params = useLocalSearchParams<{ mode?: string }>();
+  const params = useLocalSearchParams<{
+    mode?: string;
+    constellation?: string;
+  }>();
+  const { data } = useFeatures();
   const { memories } = useMemories();
   const [mode, setMode] = useState<Universe>(
     params.mode === "shared" ? "shared" : "private",
   );
   const visible = useMemo(
-    () => memories.filter((m) => m.universe === mode),
-    [memories, mode],
+    () =>
+      memories.filter(
+        (m) =>
+          m.universe === mode &&
+          (!params.constellation ||
+            data.constellations
+              .find((c) => c.id === params.constellation)
+              ?.memoryIds.includes(m.id)),
+      ),
+    [memories, mode, params.constellation, data.constellations],
   );
   const scale = useSharedValue(1),
     savedScale = useSharedValue(1),
@@ -155,6 +169,31 @@ export default function UniverseScreen() {
       </View>
       <View
         style={{
+          paddingHorizontal: 24,
+          paddingBottom: 8,
+          flexDirection: "row",
+          gap: 18,
+        }}
+      >
+        <Pressable onPress={() => router.push("/explore")}>
+          <Text style={{ color: C.lavender }}>◎ 3D Explore</Text>
+        </Pressable>
+        <Pressable onPress={() => router.push("/shared")}>
+          <Text style={{ color: C.pink }}>♡ Invite-only groups</Text>
+        </Pressable>
+        {params.constellation && (
+          <Pressable onPress={() => router.setParams({ constellation: "" })}>
+            <Text style={{ color: C.muted }}>Show all</Text>
+          </Pressable>
+        )}
+      </View>
+      {mode === "shared" && (
+        <Text style={{ color: C.muted, paddingHorizontal: 24, fontSize: 11 }}>
+          Original local demo · Real groups are under Invite-only groups
+        </Text>
+      )}
+      <View
+        style={{
           flex: 1,
           overflow: "hidden",
           borderTopWidth: 1,
@@ -175,6 +214,25 @@ export default function UniverseScreen() {
             ]}
           >
             <Svg style={{ position: "absolute" }} width={GW} height={GH}>
+              {data.constellations.flatMap((c) => {
+                const stars = c.memoryIds
+                  .map((id) => visible.find((m) => m.id === id))
+                  .filter((m) => !!m);
+                return stars
+                  .slice(1)
+                  .map((m, i) => (
+                    <Line
+                      key={`${c.id}-${m.id}`}
+                      x1={(stars[i].x * GW) / 100}
+                      y1={(stars[i].y * GH) / 100}
+                      x2={(m.x * GW) / 100}
+                      y2={(m.y * GH) / 100}
+                      stroke={C.pink}
+                      strokeWidth={2}
+                      opacity={0.8}
+                    />
+                  ));
+              })}
               {visible.slice(1).map((m, i) => (
                 <Line
                   key={m.id}
@@ -208,29 +266,35 @@ export default function UniverseScreen() {
                   justifyContent: "center",
                 }}
               >
-                <View
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 40,
-                    backgroundColor: moods[m.mood].color + "19",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderWidth: 1,
-                    borderColor: moods[m.mood].color + "66",
-                  }}
-                >
-                  <Text
+                <Magic>
+                  <View
                     style={{
-                      fontSize: 27,
-                      color: moods[m.mood].color,
-                      textShadowColor: moods[m.mood].color,
-                      textShadowRadius: 20,
+                      width: 48,
+                      height: 48,
+                      borderRadius: 40,
+                      backgroundColor: moods[m.mood].color + "19",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderWidth: data.reflections.some(
+                        (r) => r.memoryId === m.id,
+                      )
+                        ? 3
+                        : 1,
+                      borderColor: moods[m.mood].color + "66",
                     }}
                   >
-                    ✦
-                  </Text>
-                </View>
+                    <Text
+                      style={{
+                        fontSize: 27,
+                        color: moods[m.mood].color,
+                        textShadowColor: moods[m.mood].color,
+                        textShadowRadius: 20,
+                      }}
+                    >
+                      ✦
+                    </Text>
+                  </View>
+                </Magic>
                 <Text
                   numberOfLines={1}
                   style={{
@@ -324,7 +388,7 @@ export default function UniverseScreen() {
           ["✦", "Universe", "/universe"],
           ["☾", "Time Travel", "/timeline"],
           ["♡", "Create", "/create"],
-          ["✧", "About", "/about"],
+          ["✧", "Discover", "/discover"],
         ].map(([icon, label, path]) => (
           <Pressable
             key={label}

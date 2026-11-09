@@ -100,6 +100,7 @@ type Store = {
     memory: Omit<Memory, "id" | "createdAt" | "x" | "y">,
   ) => Promise<string>;
   remove: (id: string) => Promise<void>;
+  restore: (records: Memory[]) => Promise<void>;
 };
 const Context = createContext<Store | null>(null);
 const KEY = "echoverse-v1";
@@ -186,6 +187,16 @@ export function MemoryProvider({ children }: { children: React.ReactNode }) {
           removeFile(memory.photo),
           removeFile(memory.audio),
         ]);
+    },
+    restore: async (records) => {
+      if (!records.every(validMemory))
+        throw Error("Backup contains invalid memories. Nothing was imported.");
+      await commit((previous) => [
+        ...previous,
+        ...records.filter(
+          (m) => !previous.some((existing) => existing.id === m.id),
+        ),
+      ]);
     },
   };
   if (!loaded)
